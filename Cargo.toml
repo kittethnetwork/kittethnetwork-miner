@@ -13,6 +13,6 @@ opt-level = 3
 # codegen-units = 1
 
 [dependencies]
+futures = "0.3"
 sha3 = "0.9.1"
 rand = "0.8.4"
-futures = "0.3"

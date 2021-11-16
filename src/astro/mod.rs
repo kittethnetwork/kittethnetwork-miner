@@ -6,7 +6,7 @@ mod salsa20;
 // Async
 use futures::executor::LocalPool;
 use futures::task::LocalSpawnExt;
-use futures::future::{ready, pending};
+
 
 // Threads
 use std::time::Instant;
@@ -61,7 +61,7 @@ pub fn iters() {
 
 pub fn iters_async() {
     let mut pool = LocalPool::new();
-    let mut spawner = pool.spawner();
+    let spawner = pool.spawner();
 
     let iterations = 100;
     let mut benchmark = Bench::new();
@@ -69,13 +69,13 @@ pub fn iters_async() {
     for bench in 1..=8 {
         let start = Instant::now();
         for _ in 0..bench {
-            for _ in 0..iterations {
-                let future = async {
-                    let random_bytes: Vec<u8> = (0..255).map(|_| { rand::random::<u8>() }).collect();
-                    astrobwt::compute(&random_bytes, astrobwt::MAX_LENGTH);
+            let future = async move {
+                for _ in 0..iterations {
+                        let random_bytes: Vec<u8> = (0..255).map(|_| { rand::random::<u8>() }).collect();
+                        astrobwt::compute(&random_bytes, astrobwt::MAX_LENGTH);
+                    }
                 };
-                spawner.spawn_local(future);
-            }
+            spawner.spawn_local(future);
         }
 
         pool.run();
@@ -90,3 +90,5 @@ pub fn iters_async() {
         println!("{:20} {:20} {:20} {:20} {:20}", benchmark.bench[i], benchmark.duration[i], benchmark.bench[i]*iterations, benchmark.duration[i]/(benchmark.bench[i]*iterations), 1000f32 / (benchmark.duration[i] as f32 / (benchmark.bench[i]*iterations) as f32));
     }
 }
+
+
